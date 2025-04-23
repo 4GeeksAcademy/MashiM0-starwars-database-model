@@ -47,5 +47,5 @@ class fav_planet(db.Model):
 class fav_starship(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    starship_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
+    starship_id: Mapped[int] = mapped_column(ForeignKey("starship.id"))
 
