@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, ForeignKey, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 db = SQLAlchemy()
 
@@ -9,7 +9,10 @@ class User(db.Model):
     firstname: Mapped[str] = mapped_column(nullable=False)
     lastname: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
-
+    people_favorites_associates: Mapped[list['PeopleFavorites']] = relationship(
+        back_populates='user', cascade='all, delete-orphan', lazy='joined')
+    planet_favorites_associates: Mapped[list['PlanetFavorites']] = relationship(
+        back_populates='user', cascade='all, delete-orphan', lazy='joined')
 
     def serialize(self):
         return {
@@ -34,18 +37,21 @@ class Planet(db.Model):
     name: Mapped[str] = mapped_column(nullable=False)
     size: Mapped[str] = mapped_column(nullable=False)
 
-class fav_people(db.Model):
+class PeopleFavorites(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    people_id: Mapped[int] = mapped_column(ForeignKey("people.id"))
+    character_id: Mapped[int] = mapped_column(ForeignKey("people.id"))
+    character: Mapped['People'] = relationship(
+        "People", back_populates="user_favorite_associates")
+    user: Mapped['User'] = relationship(
+        "User", back_populates="people_favorites_associates")
 
-class fav_planet(db.Model):
+class PlanetFavorites(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    user: Mapped['User'] = relationship(
+        "User", back_populates="planet_favorites_associates")
     planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
-
-class fav_starship(db.Model):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    starship_id: Mapped[int] = mapped_column(ForeignKey("starship.id"))
+    planet: Mapped['Planet'] = relationship(
+        "Planet", back_populates="user_favorite_associates")
 
